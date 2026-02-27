@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vanilla Minceraft Server</title>
+  <style>
+    body {
+      background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+      color: white;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      padding-top: 50px;
+    }
+
+    .card {
+      background: rgba(0,0,0,0.6);
+      padding: 30px;
+      border-radius: 15px;
+      width: 350px;
+      margin: auto;
+    }
+
+    h1 {
+      font-size: 32px;
+    }
+
+    .status {
+      font-size: 20px;
+      margin: 15px 0;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #5865F2;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    a:hover {
+      background: #4752C4;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Vanilla MC Server</h1>
+
+<div class="card">
+  <div id="status" class="status">Checking server...</div>
+  <div id="players"></div>
+
+  <p><strong>IP:</strong> vanillaminecraftsrv.falixsrv.me</p>
+
+  <a href="https://discord.gg/UUBn2u6X" target="_blank">Join Our Discord</a>
+</div>
+
+<script>
+fetch("https://api.mcstatus.io/v2/status/java/YOUR_SERVER_IP")
+  .then(res => res.json())
+  .then(data => {
+    if(data.online){
+      document.getElementById("status").innerHTML = "🟢 Server Online";
+      document.getElementById("players").innerHTML =
+        data.players.online + " / " + data.players.max + " Players Online";
+    } else {
+      document.getElementById("status").innerHTML = "🔴 Server Offline";
+    }
+  });
+</script>
+
+</body>
+</html>
