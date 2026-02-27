@@ -2,27 +2,39 @@
 <html>
 <head>
   <title>Vanilla Minecraft Server</title>
+  <link rel="icon" href="https://static.wikia.nocookie.net/minecraft_gamepedia/images/7/7e/Grass_Block_JE7_BE6.png">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     body {
       background: #0f172a;
       color: white;
       text-align: center;
       font-family: Arial, sans-serif;
-      padding: 40px;
       margin: 0;
+      padding: 30px 15px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .player-count {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
     }
 
     .card {
       background: #1e293b;
       padding: 25px;
       border-radius: 15px;
-      max-width: 500px;
-      margin: auto;
       box-shadow: 0 0 20px rgba(0,0,0,0.4);
-    }
-
-    h1 {
       margin-bottom: 20px;
     }
 
@@ -31,27 +43,33 @@
       margin-bottom: 10px;
     }
 
+    .version {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 10px;
+    }
+
+    .ip {
+      color: #22c55e;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .ip:hover {
+      text-decoration: underline;
+    }
+
     .motd {
-      margin-top: 15px;
       font-size: 14px;
       color: #cbd5e1;
       line-height: 1.6;
+      margin-top: 15px;
     }
 
-    button {
-      margin-top: 10px;
-      padding: 8px 15px;
-      border: none;
-      border-radius: 6px;
-      background: #22c55e;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    button:hover {
-      background: #16a34a;
+    .about {
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.6;
     }
 
     a {
@@ -65,6 +83,12 @@
       font-weight: bold;
     }
 
+    footer {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
     canvas {
       margin-top: 20px;
     }
@@ -72,27 +96,46 @@
 </head>
 <body>
 
-<h1>Vanilla Minecraft Server</h1>
+<div class="container">
 
-<div class="card">
-  <div id="status" class="status">Checking server...</div>
-  <div id="players"></div>
+  <h1>Vanilla Minecraft Server</h1>
+  <div class="player-count" id="bigPlayerCount">Loading player count...</div>
 
-  <p><strong>IP:</strong> <span id="serverIP">vanillaminecraftsrv.falixsrv.me</span></p>
-  <button onclick="copyIP()" id="copyBtn">Copy IP</button>
+  <div class="card">
+    <div id="status" class="status">Checking server...</div>
+    <div class="version">Version: (Most Recent Version)</div>
 
-  <div class="motd">
-    <strong>Server Guidelines:</strong><br>
-    This is a community-focused vanilla survival server. 
-    Griefing, hacking, spamming, and advertising are strictly prohibited. 
-    Player-versus-player combat is not permitted without legitimate in-game reason. 
-    We aim to maintain a respectful, fair, and enjoyable environment for all players.
+    <p><strong>IP:</strong> 
+      <span class="ip" id="serverIP" onclick="copyIP()">
+        vanillaminecraftsrv.falixsrv.me
+      </span>
+    </p>
+
+    <div class="motd">
+      <strong>Server Guidelines:</strong><br>
+      This is a community-focused vanilla survival server. 
+      Griefing, hacking, spamming, and advertising are strictly prohibited. 
+      Player-versus-player combat is not permitted without legitimate in-game reason. 
+      Our goal is to maintain a respectful, fair, and enjoyable environment for all players.
+    </div>
+
+    <a href="https://discord.gg/UUBn2u6X" target="_blank">Join Discord</a>
+
+    <canvas id="playerChart"></canvas>
   </div>
 
-  <br>
-  <a href="https://discord.gg/UUBn2u6X" target="_blank">Join Discord</a>
+  <div class="card">
+    <div class="about">
+      <strong>About the Server:</strong><br>
+      Vanilla Minecraft Server is designed for long-term survival gameplay with a focus on community building, fairness, and cooperative play. 
+      We aim to provide a stable and welcoming environment where players can create, explore, and thrive together.
+    </div>
+  </div>
 
-  <canvas id="playerChart"></canvas>
+  <footer>
+    © 2026 Vanilla Minecraft Server — Not affiliated with Mojang.
+  </footer>
+
 </div>
 
 <script>
@@ -106,7 +149,7 @@ const chart = new Chart(ctx, {
     datasets: [{
       label: 'Players Online',
       data: [],
-      borderColor: '#00ffcc',
+      borderColor: '#22c55e',
       tension: 0.3
     }]
   },
@@ -126,9 +169,9 @@ async function updateStatus() {
 
     if (data.online) {
       document.getElementById("status").innerHTML = "Server Online";
-      document.getElementById("players").innerHTML =
-        `${data.players.online} / ${data.players.max} Players Online`;
-
+      document.getElementById("bigPlayerCount").innerHTML =
+        data.players.online + " Players Online";
+      
       const time = new Date().toLocaleTimeString();
 
       chart.data.labels.push(time);
@@ -142,7 +185,8 @@ async function updateStatus() {
       chart.update();
     } else {
       document.getElementById("status").innerHTML = "Server Offline";
-      document.getElementById("players").innerHTML = "";
+      document.getElementById("bigPlayerCount").innerHTML =
+        "0 Players Online";
     }
   } catch (error) {
     document.getElementById("status").innerHTML = "Error fetching status";
@@ -152,15 +196,7 @@ async function updateStatus() {
 function copyIP() {
   const ip = document.getElementById("serverIP").innerText;
   navigator.clipboard.writeText(ip);
-
-  const btn = document.getElementById("copyBtn");
-  btn.innerText = "Copied!";
-  btn.style.background = "#3b82f6";
-
-  setTimeout(() => {
-    btn.innerText = "Copy IP";
-    btn.style.background = "#22c55e";
-  }, 2000);
+  alert("Server IP copied to clipboard!");
 }
 
 updateStatus();
