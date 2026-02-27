@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Vanilla MInecraft Server</title>
+  <title>Vanilla Minecraft Server</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -18,10 +18,32 @@
       border-radius: 15px;
       max-width: 500px;
       margin: auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
     }
 
-    canvas {
-      margin-top: 20px;
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .status {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      background: #22c55e;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #16a34a;
     }
 
     a {
@@ -34,25 +56,32 @@
       border-radius: 8px;
       font-weight: bold;
     }
+
+    canvas {
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
 
-<h1>Vanilla MC Server</h1>
+<h1>Vanilla Minecraft Server</h1>
 
 <div class="card">
-  <div id="status">Checking server...</div>
+  <div id="status" class="status">Checking server...</div>
   <div id="players"></div>
-  <p><strong>IP:</strong> vanillaminecraftsrv.falixsrv.me</p>
-  <a href="" target="_blank">Join Discord</a>
 
-  <canvas id="playerChart">https://discord.gg/UUBn2u6X</canvas>
+  <p><strong>IP:</strong> <span id="serverIP">vanillaminecraftsrv.falixsrv.me</span></p>
+  <button onclick="copyIP()" id="copyBtn">Copy IP</button>
+
+  <br>
+  <a href="https://discord.gg/UUBn2u6X" target="_blank">Join Discord</a>
+
+  <canvas id="playerChart"></canvas>
 </div>
 
 <script>
 const serverIP = "vanillaminecraftsrv.falixsrv.me";
 const ctx = document.getElementById('playerChart');
-let playerHistory = [];
 
 const chart = new Chart(ctx, {
   type: 'line',
@@ -80,9 +109,9 @@ async function updateStatus() {
     const data = await response.json();
 
     if (data.online) {
-      document.getElementById("status").innerHTML = "🟢 Server Online";
+      document.getElementById("status").innerHTML = "Server Online";
       document.getElementById("players").innerHTML =
-        `${data.players.online} / ${data.players.max} Players`;
+        `${data.players.online} / ${data.players.max} Players Online`;
 
       const time = new Date().toLocaleTimeString();
 
@@ -96,12 +125,26 @@ async function updateStatus() {
 
       chart.update();
     } else {
-      document.getElementById("status").innerHTML = "🔴 Server Offline";
+      document.getElementById("status").innerHTML = "Server Offline";
       document.getElementById("players").innerHTML = "";
     }
   } catch (error) {
-    document.getElementById("status").innerHTML = "⚠️ Error fetching status";
+    document.getElementById("status").innerHTML = "Error fetching status";
   }
+}
+
+function copyIP() {
+  const ip = document.getElementById("serverIP").innerText;
+  navigator.clipboard.writeText(ip);
+
+  const btn = document.getElementById("copyBtn");
+  btn.innerText = "Copied!";
+  btn.style.background = "#3b82f6";
+
+  setTimeout(() => {
+    btn.innerText = "Copy IP";
+    btn.style.background = "#22c55e";
+  }, 2000);
 }
 
 updateStatus();
