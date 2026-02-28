@@ -15,10 +15,13 @@
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 40px;
+            background-color: #1e1e1e;
+            color: white;
         }
 
         h1 {
             font-size: 40px;
+            color: #4CAF50;
         }
 
         .status-box {
@@ -31,6 +34,24 @@
             font-size: 16px;
             cursor: pointer;
             margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
 
         .rules {
@@ -112,13 +133,24 @@ let playerChart = new Chart(ctx, {
         datasets: [{
             label: 'Players Online',
             data: [],
-            borderWidth: 2
+            borderColor: '#4CAF50',
+            borderWidth: 2,
+            fill: false
         }]
     },
     options: {
         scales: {
             y: {
-                beginAtZero: true
+                beginAtZero: true,
+                ticks: { color: "white" }
+            },
+            x: {
+                ticks: { color: "white" }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: { color: "white" }
             }
         }
     }
