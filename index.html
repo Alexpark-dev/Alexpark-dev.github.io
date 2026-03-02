@@ -7,67 +7,111 @@
 
 <style>
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
-    background-color: #1e234f;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1e234f, #11142b);
     color: white;
 }
 
 .container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: auto;
     padding: 40px 20px;
     text-align: center;
 }
 
+.card {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    margin-bottom: 30px;
+}
+
 h1 {
-    font-size: 32px;
     color: #4CAF50;
 }
 
-.status-box {
+.status-line {
     font-size: 20px;
-    margin: 25px 0;
+    margin: 20px 0;
 }
 
-.record {
-    font-size: 18px;
-    margin-top: 10px;
-    color: gold;
+.dot {
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    animation: pulse 1.5s infinite;
+}
+
+.green { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; }
+.red { background-color: #f44336; box-shadow: 0 0 10px #f44336; }
+.yellow { background-color: #ff9800; box-shadow: 0 0 10px #ff9800; }
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 button {
     padding: 12px 24px;
     font-size: 16px;
     cursor: pointer;
-    margin-top: 10px;
-    background-color: #4CAF50;
-    color: white;
+    margin: 8px;
     border: none;
     border-radius: 8px;
+    transition: 0.2s ease;
+}
+
+.copy-btn {
+    background-color: #4CAF50;
+    color: white;
 }
 
 .start-btn {
     background-color: #ff9800;
+    color: white;
 }
 
-.start-btn:hover {
-    background-color: #e68900;
+button:hover {
     transform: scale(1.05);
 }
 
+.record {
+    margin-top: 10px;
+    color: gold;
+    font-size: 18px;
+}
+
+.join-counter {
+    margin-top: 5px;
+    color: #90caf9;
+    font-size: 16px;
+}
+
+.player-list {
+    margin-top: 20px;
+    text-align: left;
+    display: inline-block;
+}
+
+.player-list h3 {
+    margin-bottom: 8px;
+}
+
 .chart-wrapper {
-    margin-top: 40px;
-    height: 250px;
+    height: 260px;
 }
 
 footer {
-    background-color: #212229;
-    padding: 30px 20px;
     text-align: center;
+    padding: 20px;
+    color: #aaa;
     font-size: 14px;
-    color: #bbb;
-    margin-top: 40px;
 }
 </style>
 </head>
@@ -76,35 +120,46 @@ footer {
 
 <div class="container">
 
+<div class="card">
 <h1>Vanilla Minecraft Server</h1>
 
 <p><strong>Server IP:</strong> vanillaminecraftsrv.falixsrv.me</p>
 
-<button onclick="copyIP()">Copy IP</button>
+<button class="copy-btn" onclick="copyIP()">Copy IP</button>
 
-<br>
-
-<a href="https://falixnodes.net/startserver?ip=vanillaminecraftsrv.falixsrv.me"
+<a id="startButton"
+   href="https://falixnodes.net/startserver?ip=vanillaminecraftsrv.falixsrv.me"
    target="_blank"
    rel="noopener noreferrer">
     <button class="start-btn">Start the Server</button>
 </a>
 
-<div class="status-box">
-    <p id="status">Checking server status...</p>
-    <p><strong>Version:</strong> Most Recent Version</p>
-    <div class="record">🏆 Peak Players: <span id="peak">0</span></div>
+<div class="status-line" id="statusLine">
+    Checking server status...
 </div>
 
+<div class="record">
+🏆 Peak Players: <span id="peak">0</span>
+</div>
+
+<div class="join-counter">
+📈 Total Joins: <span id="joins">0</span>
+</div>
+
+<div class="player-list" id="playerList"></div>
+
+</div>
+
+<div class="card">
 <div class="chart-wrapper">
-    <canvas id="playerChart"></canvas>
+<canvas id="playerChart"></canvas>
+</div>
 </div>
 
 </div>
 
 <footer>
-    <p><strong>Vanilla Minecraft Server</strong></p>
-    <p>© 2026 Vanilla Minecraft Server</p>
+© 2026 Vanilla Minecraft Server
 </footer>
 
 <script>
@@ -113,9 +168,17 @@ const serverIP = "vanillaminecraftsrv.falixsrv.me";
 let zeroPlayerTimer = 0;
 const zeroLimit = 30000;
 
-// Load peak players from browser storage
 let peakPlayers = localStorage.getItem("peakPlayers") || 0;
+let totalJoins = localStorage.getItem("totalJoins") || 0;
+let lastPlayerCount = 0;
+
 document.getElementById("peak").textContent = peakPlayers;
+document.getElementById("joins").textContent = totalJoins;
+
+function setStatus(colorClass, text) {
+    document.getElementById("statusLine").innerHTML =
+        `<span class="dot ${colorClass}"></span>${text}`;
+}
 
 async function fetchStatus() {
     try {
@@ -127,7 +190,18 @@ async function fetchStatus() {
             const onlinePlayers = Math.floor(data.players.online ?? 0);
             const maxPlayers = Math.floor(data.players.max ?? 0);
 
-            // Update peak
+            // Hide start button if online
+            document.getElementById("startButton").style.display = "none";
+
+            // Track joins
+            if (onlinePlayers > lastPlayerCount) {
+                totalJoins += (onlinePlayers - lastPlayerCount);
+                localStorage.setItem("totalJoins", totalJoins);
+                document.getElementById("joins").textContent = totalJoins;
+            }
+            lastPlayerCount = onlinePlayers;
+
+            // Peak tracker
             if (onlinePlayers > peakPlayers) {
                 peakPlayers = onlinePlayers;
                 localStorage.setItem("peakPlayers", peakPlayers);
@@ -139,32 +213,45 @@ async function fetchStatus() {
                 zeroPlayerTimer += 10000;
 
                 if (zeroPlayerTimer >= zeroLimit) {
-                    document.getElementById("status").innerHTML =
-                        "<span style='color:red;'>● OFFLINE (Sleeping)</span>";
+                    setStatus("red", "Server Sleeping");
+                    document.getElementById("startButton").style.display = "inline-block";
                     updateChart(0);
+                    document.getElementById("playerList").innerHTML = "";
                     return;
                 }
 
+                setStatus("yellow", "Server Starting...");
             } else {
                 zeroPlayerTimer = 0;
+                setStatus("green", `Online — ${onlinePlayers}/${maxPlayers} Players`);
             }
-
-            document.getElementById("status").innerHTML =
-                "<span style='color:#4CAF50;'>● ONLINE</span><br>Players: "
-                + onlinePlayers + "/" + maxPlayers;
 
             updateChart(onlinePlayers);
 
+            // Player List
+            if (data.players.list && data.players.list.length > 0) {
+                let listHTML = "<h3>Online Players:</h3><ul>";
+                data.players.list.forEach(player => {
+                    listHTML += `<li>${player}</li>`;
+                });
+                listHTML += "</ul>";
+                document.getElementById("playerList").innerHTML = listHTML;
+            } else {
+                document.getElementById("playerList").innerHTML = "";
+            }
+
         } else {
             zeroPlayerTimer = 0;
-            document.getElementById("status").innerHTML =
-                "<span style='color:red;'>● OFFLINE</span>";
+            setStatus("red", "Server Offline");
+            document.getElementById("startButton").style.display = "inline-block";
+            document.getElementById("playerList").innerHTML = "";
             updateChart(0);
         }
 
     } catch {
-        document.getElementById("status").innerHTML =
-            "<span style='color:red;'>● OFFLINE</span>";
+        setStatus("red", "Server Offline");
+        document.getElementById("startButton").style.display = "inline-block";
+        document.getElementById("playerList").innerHTML = "";
         updateChart(0);
     }
 }
@@ -184,7 +271,7 @@ let playerChart = new Chart(ctx, {
             label: 'Players Online',
             data: [],
             borderColor: '#4CAF50',
-            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            backgroundColor: 'rgba(76,175,80,0.15)',
             tension: 0.4,
             fill: true
         }]
@@ -192,15 +279,12 @@ let playerChart = new Chart(ctx, {
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 500 },
+        animation: { duration: 400 },
         scales: {
             y: {
                 min: 0,
                 suggestedMax: 3,
-                ticks: {
-                    color: "white",
-                    stepSize: 1
-                }
+                ticks: { color: "white", stepSize: 1 }
             },
             x: {
                 ticks: { color: "white" }
