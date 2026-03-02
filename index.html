@@ -2,11 +2,8 @@
 <html>
 <head>
     <title>Vanilla Minecraft Server</title>
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link rel="icon" type="image/webp" href="https://static.planetminecraft.com/files/image/minecraft/texture-pack/2021/709/14376136-pack_xl.webp">
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -27,7 +24,6 @@
         h1 {
             font-size: 36px;
             color: #4CAF50;
-            margin-bottom: 15px;
         }
 
         .status-box {
@@ -44,33 +40,6 @@
             color: white;
             border: none;
             border-radius: 8px;
-            transition: 0.2s;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        a {
-            color: #4CAF50;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .rules {
-            margin-top: 40px;
-            text-align: left;
-            background: rgba(255,255,255,0.05);
-            padding: 25px;
-            border-radius: 12px;
-        }
-
-        .rules h2 {
-            margin-top: 0;
         }
 
         .chart-wrapper {
@@ -89,29 +58,6 @@
         footer strong {
             color: #4CAF50;
         }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 25px 15px;
-            }
-
-            h1 {
-                font-size: 26px;
-            }
-
-            .status-box {
-                font-size: 16px;
-            }
-
-            button {
-                width: 100%;
-                max-width: 300px;
-            }
-
-            .rules {
-                font-size: 14px;
-            }
-        }
     </style>
 </head>
 
@@ -119,43 +65,25 @@
 
 <div class="container">
 
-    <h1>Vanilla Minecraft Server</h1>
+<h1>Vanilla Minecraft Server</h1>
 
-    <p><strong>Server IP:</strong> vanillaminecraftsrv.falixsrv.me</p>
-    <button onclick="copyIP()">Copy IP</button>
+<p><strong>Server IP:</strong> vanillaminecraftsrv.falixsrv.me</p>
+<button onclick="copyIP()">Copy IP</button>
 
-    <div class="status-box">
-        <p id="status">Checking server status...</p>
-        <p><strong>Version:</strong> Most Recent Version</p>
-    </div>
+<div class="status-box">
+    <p id="status">Checking server status...</p>
+    <p><strong>Version:</strong> Most Recent Version</p>
+</div>
 
-    <p>
-        <a href="https://discord.gg/UUBn2u6X" target="_blank">
-            Join Our Discord
-        </a>
-    </p>
-
-    <div class="chart-wrapper">
-        <canvas id="playerChart"></canvas>
-    </div>
-
-    <div class="rules">
-        <h2>Rules:</h2>
-        <ol>
-            <li>No griefing or stealing</li>
-            <li>No hacks or cheats</li>
-            <li>No PvP without consent from the other player</li>
-            <li>No spamming or advertising</li>
-        </ol>
-    </div>
+<div class="chart-wrapper">
+    <canvas id="playerChart"></canvas>
+</div>
 
 </div>
 
 <footer>
     <p><strong>Vanilla Minecraft Server</strong> — A community-focused survival experience.</p>
-    <p>Respect all players. Play fair. Build something great.</p>
     <p>© 2026 Vanilla Minecraft Server. All rights reserved.</p>
-    <p>This server is not affiliated with Mojang or Microsoft.</p>
 </footer>
 
 <script>
@@ -168,11 +96,13 @@ async function fetchStatus() {
 
         const online = data.online === true;
         const hasPlayers = data.players && typeof data.players.online === "number";
+        const validMax = data.players && data.players.max > 0;
+        const hasMotd = data.motd && data.motd.clean;
 
-        if (online && hasPlayers) {
+        if (online && hasPlayers && validMax && hasMotd) {
 
             const onlinePlayers = Math.floor(data.players.online);
-            const maxPlayers = Math.floor(data.players.max ?? 0);
+            const maxPlayers = Math.floor(data.players.max);
 
             document.getElementById("status").innerHTML =
                 "<span style='color:#4CAF50;'>● ONLINE</span><br>Players: "
@@ -197,6 +127,7 @@ function copyIP() {
 }
 
 const ctx = document.getElementById('playerChart').getContext('2d');
+
 let playerChart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -215,14 +146,11 @@ let playerChart = new Chart(ctx, {
         scales: {
             y: {
                 beginAtZero: true,
+                min: 0,
+                suggestedMax: 3,
                 ticks: {
                     color: "white",
-                    stepSize: 1,
-                    callback: function(value) {
-                        if (Number.isInteger(value)) {
-                            return value;
-                        }
-                    }
+                    stepSize: 1
                 }
             },
             x: {
