@@ -166,20 +166,28 @@ async function fetchStatus() {
         const response = await fetch("https://api.mcsrvstat.us/2/" + serverIP);
         const data = await response.json();
 
-        if (data.online === true) {
-            const onlinePlayers = data.players?.online ?? 0;
-            const maxPlayers = data.players?.max ?? 0;
+        const online = data.online === true;
+        const hasPlayers = data.players && typeof data.players.online === "number";
+
+        if (online && hasPlayers) {
+
+            const onlinePlayers = Math.floor(data.players.online);
+            const maxPlayers = Math.floor(data.players.max ?? 0);
 
             document.getElementById("status").innerHTML =
-                "Server is ONLINE<br>Players: " + onlinePlayers + "/" + maxPlayers;
+                "<span style='color:#4CAF50;'>● ONLINE</span><br>Players: "
+                + onlinePlayers + "/" + maxPlayers;
 
             updateChart(onlinePlayers);
+
         } else {
-            document.getElementById("status").innerHTML = "Server is OFFLINE";
+            document.getElementById("status").innerHTML =
+                "<span style='color:red;'>● OFFLINE</span>";
         }
 
     } catch (error) {
-        document.getElementById("status").innerHTML = "Could not fetch server status.";
+        document.getElementById("status").innerHTML =
+            "<span style='color:red;'>● OFFLINE</span>";
     }
 }
 
@@ -207,7 +215,15 @@ let playerChart = new Chart(ctx, {
         scales: {
             y: {
                 beginAtZero: true,
-                ticks: { color: "white" }
+                ticks: {
+                    color: "white",
+                    stepSize: 1,
+                    callback: function(value) {
+                        if (Number.isInteger(value)) {
+                            return value;
+                        }
+                    }
+                }
             },
             x: {
                 ticks: { color: "white" }
