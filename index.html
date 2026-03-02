@@ -3,62 +3,73 @@
 <head>
     <title>Vanilla Minecraft Server</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/webp" href="https://static.planetminecraft.com/files/image/minecraft/texture-pack/2021/709/14376136-pack_xl.webp">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #1e234f;
-            color: white;
-        }
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #1e234f;
+    color: white;
+}
 
-        .container {
-            max-width: 900px;
-            margin: auto;
-            padding: 40px 20px;
-            text-align: center;
-        }
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 40px 20px;
+    text-align: center;
+}
 
-        h1 {
-            font-size: 36px;
-            color: #4CAF50;
-        }
+h1 {
+    font-size: 32px;
+    color: #4CAF50;
+}
 
-        .status-box {
-            font-size: 20px;
-            margin: 25px 0;
-        }
+.status-box {
+    font-size: 20px;
+    margin: 25px 0;
+}
 
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-        }
+.record {
+    font-size: 18px;
+    margin-top: 10px;
+    color: gold;
+}
 
-        .chart-wrapper {
-            margin-top: 40px;
-            height: 250px;
-        }
+button {
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
 
-        footer {
-            background-color: #212229;
-            padding: 35px 20px;
-            text-align: center;
-            font-size: 14px;
-            color: #bbb;
-        }
+.start-btn {
+    background-color: #ff9800;
+}
 
-        footer strong {
-            color: #4CAF50;
-        }
-    </style>
+.start-btn:hover {
+    background-color: #e68900;
+    transform: scale(1.05);
+}
+
+.chart-wrapper {
+    margin-top: 40px;
+    height: 250px;
+}
+
+footer {
+    background-color: #212229;
+    padding: 30px 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #bbb;
+    margin-top: 40px;
+}
+</style>
 </head>
 
 <body>
@@ -68,11 +79,21 @@
 <h1>Vanilla Minecraft Server</h1>
 
 <p><strong>Server IP:</strong> vanillaminecraftsrv.falixsrv.me</p>
+
 <button onclick="copyIP()">Copy IP</button>
+
+<br>
+
+<a href="https://falixnodes.net/startserver?ip=vanillaminecraftsrv.falixsrv.me"
+   target="_blank"
+   rel="noopener noreferrer">
+    <button class="start-btn">Start the Server</button>
+</a>
 
 <div class="status-box">
     <p id="status">Checking server status...</p>
     <p><strong>Version:</strong> Most Recent Version</p>
+    <div class="record">🏆 Peak Players: <span id="peak">0</span></div>
 </div>
 
 <div class="chart-wrapper">
@@ -82,27 +103,51 @@
 </div>
 
 <footer>
-    <p><strong>Vanilla Minecraft Server</strong> — A community-focused survival experience.</p>
-    <p>© 2026 Vanilla Minecraft Server. All rights reserved.</p>
+    <p><strong>Vanilla Minecraft Server</strong></p>
+    <p>© 2026 Vanilla Minecraft Server</p>
 </footer>
 
 <script>
 const serverIP = "vanillaminecraftsrv.falixsrv.me";
+
+let zeroPlayerTimer = 0;
+const zeroLimit = 30000;
+
+// Load peak players from browser storage
+let peakPlayers = localStorage.getItem("peakPlayers") || 0;
+document.getElementById("peak").textContent = peakPlayers;
 
 async function fetchStatus() {
     try {
         const response = await fetch("https://api.mcsrvstat.us/2/" + serverIP);
         const data = await response.json();
 
-        const online = data.online === true;
-        const hasPlayers = data.players && typeof data.players.online === "number";
-        const validMax = data.players && data.players.max > 0;
-        const hasMotd = data.motd && data.motd.clean;
+        if (data.online === true && data.players) {
 
-        if (online && hasPlayers && validMax && hasMotd) {
+            const onlinePlayers = Math.floor(data.players.online ?? 0);
+            const maxPlayers = Math.floor(data.players.max ?? 0);
 
-            const onlinePlayers = Math.floor(data.players.online);
-            const maxPlayers = Math.floor(data.players.max);
+            // Update peak
+            if (onlinePlayers > peakPlayers) {
+                peakPlayers = onlinePlayers;
+                localStorage.setItem("peakPlayers", peakPlayers);
+                document.getElementById("peak").textContent = peakPlayers;
+            }
+
+            // Sleep detection
+            if (onlinePlayers === 0) {
+                zeroPlayerTimer += 10000;
+
+                if (zeroPlayerTimer >= zeroLimit) {
+                    document.getElementById("status").innerHTML =
+                        "<span style='color:red;'>● OFFLINE (Sleeping)</span>";
+                    updateChart(0);
+                    return;
+                }
+
+            } else {
+                zeroPlayerTimer = 0;
+            }
 
             document.getElementById("status").innerHTML =
                 "<span style='color:#4CAF50;'>● ONLINE</span><br>Players: "
@@ -111,13 +156,16 @@ async function fetchStatus() {
             updateChart(onlinePlayers);
 
         } else {
+            zeroPlayerTimer = 0;
             document.getElementById("status").innerHTML =
                 "<span style='color:red;'>● OFFLINE</span>";
+            updateChart(0);
         }
 
-    } catch (error) {
+    } catch {
         document.getElementById("status").innerHTML =
             "<span style='color:red;'>● OFFLINE</span>";
+        updateChart(0);
     }
 }
 
@@ -136,16 +184,17 @@ let playerChart = new Chart(ctx, {
             label: 'Players Online',
             data: [],
             borderColor: '#4CAF50',
-            borderWidth: 2,
-            fill: false
+            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            tension: 0.4,
+            fill: true
         }]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: { duration: 500 },
         scales: {
             y: {
-                beginAtZero: true,
                 min: 0,
                 suggestedMax: 3,
                 ticks: {
@@ -168,7 +217,7 @@ let playerChart = new Chart(ctx, {
 function updateChart(playerCount) {
     const time = new Date().toLocaleTimeString();
 
-    if (playerChart.data.labels.length > 10) {
+    if (playerChart.data.labels.length >= 20) {
         playerChart.data.labels.shift();
         playerChart.data.datasets[0].data.shift();
     }
@@ -179,7 +228,7 @@ function updateChart(playerCount) {
 }
 
 fetchStatus();
-setInterval(fetchStatus, 30000);
+setInterval(fetchStatus, 10000);
 </script>
 
 </body>
