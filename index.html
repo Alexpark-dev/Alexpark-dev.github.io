@@ -3,10 +3,8 @@
 <head>
     <title>Vanilla Minecraft Server</title>
 
-    <!-- ✅ Makes it responsive on mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Favicon -->
     <link rel="icon" type="image/webp" href="https://static.planetminecraft.com/files/image/minecraft/texture-pack/2021/709/14376136-pack_xl.webp">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,22 +12,27 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
             margin: 0;
             background-color: #1e234f;
             color: white;
         }
 
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
         h1 {
-            font-size: 32px;
+            font-size: 36px;
             color: #4CAF50;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .status-box {
-            font-size: 18px;
-            margin: 20px 0;
+            font-size: 20px;
+            margin: 25px 0;
         }
 
         button {
@@ -41,6 +44,7 @@
             color: white;
             border: none;
             border-radius: 8px;
+            transition: 0.2s;
         }
 
         button:hover {
@@ -51,34 +55,34 @@
             color: #4CAF50;
             text-decoration: none;
             font-weight: bold;
-            display: inline-block;
-            margin-top: 10px;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
 
         .rules {
             margin-top: 40px;
-            font-size: 15px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
             text-align: left;
             background: rgba(255,255,255,0.05);
-            padding: 20px;
+            padding: 25px;
             border-radius: 12px;
         }
 
-        #playerChart {
-            width: 100% !important;
-            max-width: 600px;
-            height: 220px !important;
-            margin: 30px auto;
+        .rules h2 {
+            margin-top: 0;
+        }
+
+        .chart-wrapper {
+            margin-top: 40px;
+            height: 250px;
         }
 
         footer {
-            margin-top: 60px;
-            padding: 30px 15px;
             background-color: #212229;
-            font-size: 13px;
+            padding: 35px 20px;
+            text-align: center;
+            font-size: 14px;
             color: #bbb;
         }
 
@@ -86,8 +90,11 @@
             color: #4CAF50;
         }
 
-        /* 📱 Extra mobile tuning */
         @media (max-width: 600px) {
+            .container {
+                padding: 25px 15px;
+            }
+
             h1 {
                 font-size: 26px;
             }
@@ -110,32 +117,38 @@
 
 <body>
 
-<h1>Vanilla Minecraft Server</h1>
+<div class="container">
 
-<p><strong>Server IP:</strong> vanillaminecraftsrv.falixsrv.me</p>
-<button onclick="copyIP()">Copy IP</button>
+    <h1>Vanilla Minecraft Server</h1>
 
-<div class="status-box">
-    <p id="status">Checking server status...</p>
-    <p><strong>Version:</strong> (most recent version)4</p>
-</div>
+    <p><strong>Server IP:</strong> vanillaminecraftsrv.falixsrv.me</p>
+    <button onclick="copyIP()">Copy IP</button>
 
-<p>
-    <a href="https://discord.gg/UUBn2u6X" target="_blank">
-        Join Our Discord
-    </a>
-</p>
+    <div class="status-box">
+        <p id="status">Checking server status...</p>
+        <p><strong>Version:</strong> Most Recent Version</p>
+    </div>
 
-<canvas id="playerChart"></canvas>
+    <p>
+        <a href="https://discord.gg/UUBn2u6X" target="_blank">
+            Join Our Discord
+        </a>
+    </p>
 
-<div class="rules">
-    <h2>Rules:</h2>
-    <ol>
-        <li>No griefing or stealing</li>
-        <li>No hacks or cheats</li>
-        <li>No PvP without consent from the other player</li>
-        <li>No spamming or advertising</li>
-    </ol>
+    <div class="chart-wrapper">
+        <canvas id="playerChart"></canvas>
+    </div>
+
+    <div class="rules">
+        <h2>Rules:</h2>
+        <ol>
+            <li>No griefing or stealing</li>
+            <li>No hacks or cheats</li>
+            <li>No PvP without consent from the other player</li>
+            <li>No spamming or advertising</li>
+        </ol>
+    </div>
+
 </div>
 
 <footer>
