@@ -4,9 +4,9 @@
     <title>Vanilla Minecraft Server</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvqIyQ1oC4phgc9E_7KWUikh_yr9JdsvWpcw&s">
-    <link rel="shortcut icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvqIyQ1oC4phgc9E_7KWUikh_yr9JdsvWpcw&s">
-    <link rel="apple-touch-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvqIyQ1oC4phgc9E_7KWUikh_yr9JdsvWpcw&s">
+    <link rel="icon" type="image/webp" href="https://static.planetminecraft.com/files/image/minecraft/texture-pack/2021/709/14376136-pack_xl.webp">
+    <link rel="shortcut icon" href="https://static.planetminecraft.com/files/image/minecraft/texture-pack/2021/709/14376136-pack_xl.webp">
+    <link rel="apple-touch-icon" href="https://static.planetminecraft.com/files/image/minecraft/texture-pack/2021/709/14376136-pack_xl.webp">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -15,9 +15,9 @@
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 40px;
-            background-color: #1e1e1e;
-            color: white;
             margin: 0;
+            background-color: #1e234f;
+            color: white;
         }
 
         h1 {
@@ -72,8 +72,8 @@
 
         footer {
             margin-top: 60px;
-            padding: 25px 10px;
-            background-color: #141414;
+            padding: 30px 15px;
+            background-color: #212229;
             border-top: 1px solid #333;
             font-size: 14px;
             color: #bbb;
@@ -94,7 +94,7 @@
 
 <div class="status-box">
     <p id="status">Checking server status...</p>
-    <p><strong>Version:</strong> (most recent version)</p>
+    <p><strong>Version:</strong> (most recent version)4</p>
 </div>
 
 <p>
@@ -127,19 +127,25 @@ const serverIP = "vanillaminecraftsrv.falixsrv.me";
 
 async function fetchStatus() {
     try {
-        const response = await fetch(`https://api.mcsrvstat.us/2/${serverIP}`);
+        const response = await fetch("https://api.mcsrvstat.us/2/" + serverIP);
         const data = await response.json();
 
-        if (data.online) {
-            document.getElementById("status").innerHTML =
-                "Server is ONLINE<br>Players: " + data.players.online + "/" + data.players.max;
+        if (data.online === true) {
 
-            updateChart(data.players.online);
+            const onlinePlayers = data.players?.online ?? 0;
+            const maxPlayers = data.players?.max ?? 0;
+
+            document.getElementById("status").innerHTML =
+                "Server is ONLINE<br>Players: " + onlinePlayers + "/" + maxPlayers;
+
+            updateChart(onlinePlayers);
+
         } else {
             document.getElementById("status").innerHTML = "Server is OFFLINE";
         }
+
     } catch (error) {
-        document.getElementById("status").innerHTML = "Error checking server.";
+        document.getElementById("status").innerHTML = "Could not fetch server status.";
     }
 }
 
