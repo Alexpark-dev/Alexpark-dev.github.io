@@ -1,45 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Vanilla Minecraft Server</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>Vanilla Minecraft Server</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #1e234f, #11142b);
-    color: white;
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#1e234f;
+    color:white;
 }
 
 .container {
-    max-width: 1100px;
-    margin: auto;
-    padding: 40px 20px;
-    text-align: center;
+    max-width:1100px;
+    margin:auto;
+    padding:30px 15px;
+    text-align:center;
 }
 
 .card {
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(10px);
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.4);
-    margin-bottom: 30px;
+    background:rgba(255,255,255,0.06);
+    backdrop-filter:blur(10px);
+    padding:25px;
+    border-radius:15px;
+    margin-bottom:25px;
 }
 
-h1 { color: #4CAF50; }
+h1 { color:#4CAF50; }
 
-.status-line { font-size: 20px; margin: 20px 0; }
+.status-line { font-size:20px; margin:15px 0; }
 
 .dot {
-    height: 14px;
-    width: 14px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 8px;
-    animation: pulse 1.5s infinite;
+    height:14px;
+    width:14px;
+    border-radius:50%;
+    display:inline-block;
+    margin-right:8px;
+    animation:pulse 1.5s infinite;
 }
 
 .green { background:#4CAF50; box-shadow:0 0 10px #4CAF50; }
@@ -47,36 +46,56 @@ h1 { color: #4CAF50; }
 .yellow { background:#ff9800; box-shadow:0 0 10px #ff9800; }
 
 @keyframes pulse {
-    0%{transform:scale(1);opacity:1;}
-    50%{transform:scale(1.3);opacity:0.7;}
-    100%{transform:scale(1);opacity:1;}
+    0%{transform:scale(1);}
+    50%{transform:scale(1.3);}
+    100%{transform:scale(1);}
 }
 
 button {
-    padding: 12px 24px;
-    font-size: 16px;
-    cursor: pointer;
-    margin: 8px;
-    border: none;
-    border-radius: 8px;
-    transition: 0.2s ease;
+    padding:12px 20px;
+    font-size:16px;
+    cursor:pointer;
+    border:none;
+    border-radius:8px;
+    margin:8px;
+    transition:0.2s;
 }
+
+button:hover { transform:scale(1.05); }
 
 .copy-btn { background:#4CAF50;color:white; }
 .start-btn { background:#ff9800;color:white; }
 
-button:hover { transform: scale(1.05); }
-
-.record { margin-top:10px;color:gold;font-size:18px; }
-.join-counter { margin-top:5px;color:#90caf9;font-size:16px; }
-
 .chart-wrapper { height:260px; }
 
+.player-list {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:15px;
+}
+
+.player-card {
+    background:rgba(255,255,255,0.08);
+    padding:10px 15px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.player-card img {
+    width:40px;
+    height:40px;
+    border-radius:6px;
+}
+
 footer {
-    text-align:center;
+    background:#212229;
     padding:20px;
-    color:#aaa;
     font-size:14px;
+    color:#aaa;
+    margin-top:30px;
 }
 </style>
 </head>
@@ -94,24 +113,17 @@ footer {
 <button class="copy-btn" onclick="copyIP()">Copy IP</button>
 
 <a id="startButton"
-   href="https://falixnodes.net/startserver?ip=vanillaminecraftsrv.falixsrv.me"
-   target="_blank"
-   rel="noopener noreferrer">
-    <button class="start-btn">Start the Server</button>
+href="https://falixnodes.net/startserver?ip=vanillaminecraftsrv.falixsrv.me"
+target="_blank" rel="noopener noreferrer">
+<button class="start-btn">Start the Server</button>
 </a>
 
 <div class="status-line" id="statusLine">
-    Checking server status...
+Checking server status...
 </div>
 
-<div class="record">
-🏆 Peak Players: <span id="peak">0</span>
-</div>
-
-<div class="join-counter">
-📅 Daily Joins: <span id="joins">0</span>
-</div>
-
+<p>🏆 Peak Players: <span id="peak">0</span></p>
+<p>📅 Daily Joins: <span id="joins">0</span></p>
 </div>
 
 <div class="card">
@@ -128,6 +140,23 @@ footer {
 </div>
 </div>
 
+<div class="card">
+<h3>Players Online</h3>
+<div id="playerList" class="player-list">
+Loading players...
+</div>
+</div>
+
+<div class="card">
+<h3>Live Chat</h3>
+<iframe 
+src="https://discord.com/widget?id=YOUR_SERVER_ID&theme=dark"
+width="100%" 
+height="400"
+frameborder="0">
+</iframe>
+</div>
+
 </div>
 
 <footer>
@@ -137,151 +166,173 @@ footer {
 <script>
 const serverIP = "vanillaminecraftsrv.falixsrv.me";
 
-let peakPlayers = localStorage.getItem("peakPlayers") || 0;
-let totalJoins = localStorage.getItem("dailyJoins") || 0;
+let peakPlayers = parseInt(localStorage.getItem("peakPlayers")) || 0;
+let totalJoins = parseInt(localStorage.getItem("dailyJoins")) || 0;
 let lastPlayerCount = 0;
+let savedVersion = localStorage.getItem("serverVersion") || "Unknown";
 
 document.getElementById("peak").textContent = peakPlayers;
 document.getElementById("joins").textContent = totalJoins;
+document.getElementById("version").textContent = savedVersion;
 
-// HISTORY STORAGE (24h rolling)
 let historyData = JSON.parse(localStorage.getItem("historyData")) || [];
 
-function setStatus(color, text) {
-    document.getElementById("statusLine").innerHTML =
-        `<span class="dot ${color}"></span>${text}`;
+function setStatus(color,text){
+document.getElementById("statusLine").innerHTML =
+`<span class="dot ${color}"></span>${text}`;
 }
 
-async function fetchStatus() {
-    try {
-        const response = await fetch("https://api.mcsrvstat.us/2/" + serverIP);
-        const data = await response.json();
+async function fetchStatus(){
+try{
+const response = await fetch("https://api.mcsrvstat.us/2/"+serverIP);
+const data = await response.json();
 
-        document.getElementById("version").textContent =
-            data.version || "Unknown";
-
-        if (data.online && data.players) {
-
-            const onlinePlayers = Math.floor(data.players.online ?? 0);
-            const maxPlayers = Math.floor(data.players.max ?? 0);
-
-            document.getElementById("startButton").style.display = "none";
-
-            if (onlinePlayers > lastPlayerCount) {
-                totalJoins += (onlinePlayers - lastPlayerCount);
-                localStorage.setItem("dailyJoins", totalJoins);
-                document.getElementById("joins").textContent = totalJoins;
-            }
-            lastPlayerCount = onlinePlayers;
-
-            if (onlinePlayers > peakPlayers) {
-                peakPlayers = onlinePlayers;
-                localStorage.setItem("peakPlayers", peakPlayers);
-                document.getElementById("peak").textContent = peakPlayers;
-            }
-
-            if (onlinePlayers === 0) {
-                setStatus("yellow", "Server Starting...");
-            } else {
-                setStatus("green", `Online — ${onlinePlayers}/${maxPlayers} Players`);
-            }
-
-            updateLiveChart(onlinePlayers);
-            updateHistory(onlinePlayers);
-
-        } else {
-            setStatus("red", "Server Offline");
-            document.getElementById("startButton").style.display = "inline-block";
-            updateLiveChart(0);
-            updateHistory(0);
-        }
-
-    } catch {
-        setStatus("red", "Server Offline");
-        updateLiveChart(0);
-        updateHistory(0);
-    }
+if(data.version){
+savedVersion = data.version;
+localStorage.setItem("serverVersion", savedVersion);
+document.getElementById("version").textContent = savedVersion;
 }
 
-// LOCAL TIMEZONE SAFE FORMAT
-function getLocalTime() {
-    return new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+if(data.online && data.players){
+
+const onlinePlayers = Math.max(0,Math.floor(data.players.online||0));
+const maxPlayers = Math.max(0,Math.floor(data.players.max||0));
+
+document.getElementById("startButton").style.display="none";
+
+if(onlinePlayers>lastPlayerCount){
+totalJoins += (onlinePlayers-lastPlayerCount);
+localStorage.setItem("dailyJoins",totalJoins);
+document.getElementById("joins").textContent=totalJoins;
 }
 
-// LIVE GRAPH
-const liveCtx = document.getElementById('liveChart').getContext('2d');
-let liveChart = new Chart(liveCtx, {
-    type: 'line',
-    data: { labels: [], datasets: [{
-        label: 'Players Online',
-        data: [],
-        borderColor: '#4CAF50',
-        tension: 0.4,
-        fill: false
-    }]},
-    options: { responsive:true, maintainAspectRatio:false }
+lastPlayerCount=onlinePlayers;
+
+if(onlinePlayers>peakPlayers){
+peakPlayers=onlinePlayers;
+localStorage.setItem("peakPlayers",peakPlayers);
+document.getElementById("peak").textContent=peakPlayers;
+}
+
+if(onlinePlayers===0){
+setStatus("yellow","Server Starting...");
+}else{
+setStatus("green",`Online — ${onlinePlayers}/${maxPlayers} Players`);
+}
+
+updateLiveChart(onlinePlayers);
+updateHistory(onlinePlayers);
+
+const playerListDiv=document.getElementById("playerList");
+
+if(data.players.list && data.players.list.length>0){
+playerListDiv.innerHTML="";
+data.players.list.forEach(player=>{
+const card=document.createElement("div");
+card.className="player-card";
+card.innerHTML=`
+<img src="https://mc-heads.net/avatar/${player}/40">
+<span>${player}</span>
+`;
+playerListDiv.appendChild(card);
+});
+}else{
+playerListDiv.innerHTML="No players online.";
+}
+
+}else{
+setStatus("red","Server Offline");
+document.getElementById("startButton").style.display="inline-block";
+updateLiveChart(0);
+updateHistory(0);
+document.getElementById("playerList").innerHTML="Server Offline";
+}
+
+}catch{
+setStatus("red","Server Offline");
+updateLiveChart(0);
+updateHistory(0);
+}
+}
+
+function getLocalTime(){
+return new Date().toLocaleTimeString([],{
+hour:'2-digit',
+minute:'2-digit'
+});
+}
+
+const liveChart=new Chart(document.getElementById("liveChart"),{
+type:'line',
+data:{labels:[],datasets:[{
+label:'Players Online',
+data:[],
+borderColor:'#4CAF50',
+tension:0.2,
+fill:false
+}]},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+scales:{
+y:{beginAtZero:true,min:0,ticks:{stepSize:1,precision:0}}
+}
+}
 });
 
-function updateLiveChart(players) {
-    if (liveChart.data.labels.length >= 20) {
-        liveChart.data.labels.shift();
-        liveChart.data.datasets[0].data.shift();
-    }
-    liveChart.data.labels.push(getLocalTime());
-    liveChart.data.datasets[0].data.push(players);
-    liveChart.update();
+function updateLiveChart(players){
+if(liveChart.data.labels.length>=20){
+liveChart.data.labels.shift();
+liveChart.data.datasets[0].data.shift();
+}
+liveChart.data.labels.push(getLocalTime());
+liveChart.data.datasets[0].data.push(players);
+liveChart.update();
 }
 
-// 24H HISTORY GRAPH
-const historyCtx = document.getElementById('historyChart').getContext('2d');
-let historyChart = new Chart(historyCtx, {
-    type: 'line',
-    data: { labels: [], datasets: [{
-        label: 'Players (24h)',
-        data: [],
-        borderColor: '#90caf9',
-        tension: 0.3,
-        fill: false
-    }]},
-    options: { responsive:true, maintainAspectRatio:false }
+const historyChart=new Chart(document.getElementById("historyChart"),{
+type:'line',
+data:{labels:[],datasets:[{
+label:'Players (24h)',
+data:[],
+borderColor:'#90caf9',
+tension:0.2,
+fill:false
+}]},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+scales:{
+y:{beginAtZero:true,min:0,ticks:{stepSize:1,precision:0}}
+}
+}
 });
 
-function updateHistory(players) {
-    const timestamp = Date.now();
+function updateHistory(players){
+const timestamp=Date.now();
+historyData.push({time:timestamp,players});
+historyData=historyData.filter(e=>timestamp-e.time<=86400000);
+localStorage.setItem("historyData",JSON.stringify(historyData));
 
-    historyData.push({ time: timestamp, players: players });
+historyChart.data.labels=
+historyData.map(e=>new Date(e.time).toLocaleTimeString([],{
+hour:'2-digit',
+minute:'2-digit'
+}));
 
-    // Keep last 24 hours only
-    historyData = historyData.filter(entry =>
-        timestamp - entry.time <= 86400000
-    );
+historyChart.data.datasets[0].data=
+historyData.map(e=>e.players);
 
-    localStorage.setItem("historyData", JSON.stringify(historyData));
-
-    historyChart.data.labels =
-        historyData.map(entry =>
-            new Date(entry.time).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit'
-            })
-        );
-
-    historyChart.data.datasets[0].data =
-        historyData.map(entry => entry.players);
-
-    historyChart.update();
+historyChart.update();
 }
 
-function copyIP() {
-    navigator.clipboard.writeText(serverIP);
-    alert("Server IP copied!");
+function copyIP(){
+navigator.clipboard.writeText(serverIP);
+alert("Server IP copied!");
 }
 
 fetchStatus();
-setInterval(fetchStatus, 10000);
+setInterval(fetchStatus,30000);
 </script>
 
 </body>
