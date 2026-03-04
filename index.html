@@ -43,7 +43,6 @@ h1 { color:#4CAF50; }
 
 .green { background:#4CAF50; }
 .red { background:#f44336; }
-.yellow { background:#ff9800; }
 
 @keyframes pulse {
     0%{transform:scale(1);}
@@ -108,19 +107,17 @@ footer {
 
 <button class="copy-btn" onclick="copyIP()">Copy IP</button>
 
-<a id="startButton"
-href="https://falixnodes.net/startserver?ip=vanillaminecraftsrv.falixsrv.me"
-target="_blank">
-<button class="start-btn">Start the Server</button>
-</a>
+<button id="startButton" class="start-btn"
+onclick="window.open('https://falixnodes.net/startserver?ip=vanillaminecraftsrv.falixsrv.me','_blank')">
+Start the Server
+</button>
 
 <div class="status-line" id="statusLine">
 Checking server status...
 </div>
 
 <p>Peak Players: <span id="peak">0</span></p>
-<p>Daily Joins: <span id="dailyJoins">0</span></p>
-<p>Total Lifetime Joins: <span id="totalJoins">0</span></p>
+<p>Total Joins: <span id="totalJoins">0</span></p>
 <p>Last Checked: <span id="lastChecked">-</span></p>
 
 </div>
@@ -156,13 +153,11 @@ Loading players...
 const serverIP="vanillaminecraftsrv.falixsrv.me";
 
 let peakPlayers=parseInt(localStorage.getItem("peakPlayers"))||0;
-let dailyJoins=parseInt(localStorage.getItem("dailyJoins"))||0;
 let totalJoins=parseInt(localStorage.getItem("totalJoins"))||0;
 let lastPlayerCount=0;
 let savedVersion=localStorage.getItem("serverVersion")||"Unknown";
 
 document.getElementById("peak").textContent=peakPlayers;
-document.getElementById("dailyJoins").textContent=dailyJoins;
 document.getElementById("totalJoins").textContent=totalJoins;
 document.getElementById("version").textContent=savedVersion;
 
@@ -194,7 +189,7 @@ localStorage.setItem("serverVersion",savedVersion);
 document.getElementById("version").textContent=savedVersion;
 }
 
-if(data.online&&data.players){
+if(data.online && data.players){
 
 const onlinePlayers=Math.max(0,Math.floor(data.players.online||0));
 const maxPlayers=Math.max(0,Math.floor(data.players.max||0));
@@ -203,13 +198,8 @@ document.getElementById("startButton").style.display="none";
 
 if(onlinePlayers>lastPlayerCount){
 let difference=onlinePlayers-lastPlayerCount;
-dailyJoins+=difference;
 totalJoins+=difference;
-
-localStorage.setItem("dailyJoins",dailyJoins);
 localStorage.setItem("totalJoins",totalJoins);
-
-document.getElementById("dailyJoins").textContent=dailyJoins;
 document.getElementById("totalJoins").textContent=totalJoins;
 }
 
@@ -221,11 +211,7 @@ localStorage.setItem("peakPlayers",peakPlayers);
 document.getElementById("peak").textContent=peakPlayers;
 }
 
-if(onlinePlayers===0){
-setStatus("yellow","Server Starting...");
-}else{
 setStatus("green",`Online — ${onlinePlayers}/${maxPlayers} Players`);
-}
 
 updateLiveChart(onlinePlayers);
 updateHistory(onlinePlayers);
@@ -332,7 +318,7 @@ alert("Server IP copied!");
 }
 
 fetchStatus();
-setInterval(fetchStatus,300000); // 5 minutes
+setInterval(fetchStatus,300000);
 </script>
 
 </body>
